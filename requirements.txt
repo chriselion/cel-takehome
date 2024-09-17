@@ -1,5 +1,6 @@
 flask
 requests
 
-# Test requirements - TODO split into separate file
+# Test + lint requirements - TODO split into separate file
 pytest
+pre-commit
