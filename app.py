@@ -1,4 +1,5 @@
 from flask import Flask
+from src.types import Location  # noqa
 
 app = Flask(__name__)
 
