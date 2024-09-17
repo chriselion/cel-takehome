@@ -1,0 +1,5 @@
+flask
+requests
+
+# Test requirements - TODO split into separate file
+pytest
