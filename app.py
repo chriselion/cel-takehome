@@ -1,15 +1,15 @@
 import datetime
 import logging
+from logging.config import dictConfig
+
 
 from flask import Flask, request, abort
 
 from src.datastore.datastore import Datastore
 from src.datastore.in_mem_datastore import InMemoryDatastore
 from src import weather_gov_api
-from src.types import Location  # noqa
-
-logger = logging.getLogger(__name__)
-logging.basicConfig()
+from src.types import Location
+from src import update_forecasts
 
 app = Flask(__name__)
 _datastore = InMemoryDatastore()
@@ -19,9 +19,25 @@ def get_data_store() -> Datastore:
     return _datastore
 
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+# Default flask logging setup, from https://flask.palletsprojects.com/en/2.3.x/logging/#basic-configuration
+dictConfig(
+    {
+        "version": 1,
+        "formatters": {
+            "default": {
+                "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+            }
+        },
+        "handlers": {
+            "wsgi": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://flask.logging.wsgi_errors_stream",
+                "formatter": "default",
+            }
+        },
+        "root": {"level": "INFO", "handlers": ["wsgi"]},
+    }
+)
 
 
 @app.route("/location", methods=["POST"])
@@ -36,18 +52,20 @@ def add_location() -> str:
     datastore = get_data_store()
 
     grid_point = datastore.get_grid_point_for_location(loc)
-    # breakpoint()
     if grid_point:
-        logger.info("Found existing grid point for location")
+        logging.info("Found existing grid point for location")
     else:
         # If not, look it up from the API
-        logger.info("Didn't find grid point in datastore, looking up from API")
+        logging.info("Didn't find grid point in datastore, looking up from API")
         grid_point = weather_gov_api.get_grid_point_for_location(loc)
         # TODO handle errors from the API here and return nicer error messages
 
         # Save the Location->GridPoint mapping for future use
         datastore.add_location(loc, grid_point)
-        return "ok"
+
+        # Fetch forecasts, so that we have them available right away
+        logging.info("Fetching forecasts for new location")
+        update_forecasts.update_forecasts_for_location(loc, datastore)
 
     return "ok"
 
@@ -78,8 +96,10 @@ def get_forecasts() -> int | dict:
 
     if not forecasts:
         # TODO better error response
+        logging.info("No forecasts found")
         abort(404)
 
+    logging.info(f"Found {len(forecasts)} forecasts for {dt}")
     # TODO make sure all forecasts have the same units
     max_temp = max(f.temperature for f in forecasts)
     min_temp = min(f.temperature for f in forecasts)
