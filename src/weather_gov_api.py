@@ -14,6 +14,9 @@ DEFAULT_TIMEOUT_SECONDS = 30
 def get_grid_point_for_location(
     loc: Location, timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS
 ) -> GridPoint:
+    """
+    Looks up the GridPoint for a location from the NWS API.
+    """
     resp = requests.get(
         f"https://api.weather.gov/points/{loc.lat},{loc.lon}", timeout=timeout_seconds
     )

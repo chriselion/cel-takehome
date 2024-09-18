@@ -13,10 +13,15 @@ from src.types import Location
 from src import update_forecasts
 
 app = Flask(__name__)
+
+# The "global" datastore used by the application.
 _datastore = InMemoryDatastore()
 
 
 def get_data_store() -> Datastore:
+    """
+    Wrapper around access to the "global" datastore, so that we can mock this in unit tests.
+    """
     return _datastore
 
 
@@ -79,7 +84,7 @@ def get_forecasts() -> int | dict:
     # My understanding is that GETs with JSON bodies aren't recommended
     # (see https://stackoverflow.com/questions/978061/http-get-with-request-body)
     # But GET seems more appropriate since there are no side-effects here.
-    # As a compromise that will leave nobody happy, but methods are accepted.
+    # As a compromise that will leave nobody happy, both methods are accepted.
 
     req_body = request.json
     # Extract the fields from the request

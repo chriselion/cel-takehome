@@ -11,6 +11,9 @@ from src import weather_gov_api
 def update_forecasts_for_location(
     loc: Location, ds: Datastore, max_hours_ahead
 ) -> None:
+    """
+    Get forecasts for a Location from the NWS API, and add them to the datastore.
+    """
     max_start_time = datetime.datetime.now(tz=datetime.UTC) + datetime.timedelta(
         hours=max_hours_ahead
     )
@@ -25,6 +28,10 @@ def update_forecasts_for_location(
 
 
 def update_all_forecasts(ds: Datastore, max_hours_ahead: int):
+    """
+    Get forecasts for all known locations in the datasore from the NWS API, and add them to the datastore.
+    Any exceptions are caught and logged.
+    """
     try:
         all_locs = ds.get_all_locations()
     except Exception:
@@ -48,6 +55,10 @@ def update_all_forecasts(ds: Datastore, max_hours_ahead: int):
 def update_forecasts_loop(
     ds: Datastore, *, max_hours_ahead: int, refresh_interval_seconds: int
 ):
+    """ "
+    Loop forever, updating locations and sleeping for a while.
+    This is meant to be run in a separate thread.
+    """
     logging.info(
         f"Starting update loop. Will refresh every {refresh_interval_seconds} seconds"
     )
@@ -69,6 +80,9 @@ def update_forecasts_loop(
 def spawn_background_update(
     ds: Datastore, *, max_hours_ahead: int, refresh_interval_seconds: int
 ):
+    """
+    Start a new thread that runs update_forecasts_loop
+    """
     update_thread = threading.Thread(
         target=update_forecasts_loop,
         args=(ds,),
