@@ -9,7 +9,7 @@ from src.types import Location, GridPoint, ForecastPoint
 
 
 def get_grid_point_for_location(loc: Location) -> GridPoint:
-    resp = requests.get(f"https://api.weather.gov/points/{loc.lat},{loc.lng}")
+    resp = requests.get(f"https://api.weather.gov/points/{loc.lat},{loc.lon}")
     resp.raise_for_status()
 
     resp_json = resp.json()

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 @dataclass
 class Location:
     lat: str
-    lng: str
+    lon: str
 
 
 @dataclass
