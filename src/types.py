@@ -2,20 +2,20 @@ import datetime
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(frozen=True)
 class Location:
     lat: str
     lon: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class GridPoint:
     office: str
     grid_x: int
     grid_y: int
 
 
-@dataclass
+@dataclass(frozen=True)
 class ForecastPoint:
     temperature: int
     temperature_unit: str
