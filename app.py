@@ -29,10 +29,8 @@ def add_location() -> str:
     # TODO replace with something like pydantic to make parsing and validating easier.
     req_body = request.json
     loc_dict = req_body["location"]
-    lat = loc_dict["lat"]
-    lon = loc_dict["lon"]
     # TODO validate lat and lon are string representations of floats
-    loc = Location(lat, lon)
+    loc = Location(loc_dict["lat"], loc_dict["lon"])
 
     # See if we have this Location's grid point already
     datastore = get_data_store()
@@ -57,7 +55,10 @@ def add_location() -> str:
 @app.route("/forecasts", methods=["POST"])
 def get_forecasts() -> int | dict:
     req_body = request.json
-    loc = Location(req_body["lat"], req_body["lon"])
+    # Extract the fields from the request
+    loc_dict = req_body["location"]
+    loc = Location(loc_dict["lat"], loc_dict["lon"])
+
     date_str = req_body.get("date")
     date = datetime.date.fromisoformat(date_str)
     hour = int(req_body.get("hour"))
@@ -67,7 +68,7 @@ def get_forecasts() -> int | dict:
 
     # Get the forecasts we've recorded, and return them
     datastore = get_data_store()
-    forecasts = datastore.get_forecasts(loc, dt)
+    forecasts = datastore.get_forecasts_for_datetime(loc, dt)
 
     if not forecasts:
         abort(404)

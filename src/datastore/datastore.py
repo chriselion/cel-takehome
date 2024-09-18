@@ -10,7 +10,7 @@ class Datastore(Protocol):
 
     def add_forecasts(self, loc: Location, forecasts: Iterable[ForecastPoint]): ...
 
-    def get_forecasts(
+    def get_forecasts_for_datetime(
         self,
         loc: Location,
         dt: datetime.datetime,

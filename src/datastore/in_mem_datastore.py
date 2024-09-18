@@ -19,7 +19,7 @@ class InMemoryDatastore:
     def add_forecasts(self, loc: Location, forecasts: Iterable[ForecastPoint]):
         raise NotImplementedError()
 
-    def get_forecasts(
+    def get_forecasts_for_datetime(
         self, loc: Location, dt: datetime.datetime
     ) -> list[ForecastPoint]:
         raise NotImplementedError()
