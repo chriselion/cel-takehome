@@ -18,6 +18,8 @@ docker run --rm -it -v $(pwd):/app cel-takehome:local bash
 When the container is running, in another terminal, you can run `python end_to_end.py` to make some example requests
 against it.
 
+This was only tested on MacOS; the Docker networking might be slightly different on other OS's.
+
 ## API
 `POST /location` accepts a JSON body with the format
 ```json
