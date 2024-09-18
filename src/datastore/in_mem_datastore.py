@@ -7,6 +7,11 @@ from src.types import ForecastPoint, Location, GridPoint
 
 
 class InMemoryDatastore:
+    """
+    In-memory (dictionary) implementation of the Datastore interface.
+    See docstrings on Datastore for descriptions of methods.
+    """
+
     def __init__(self) -> None:
         # Since we'll possibly be accessing this from multiple threads (web serving and background updating),
         # We need a mutex around any access to the dictionaries.
@@ -19,6 +24,9 @@ class InMemoryDatastore:
         # Storage for the forecasts
         # For each (Location, forecast datetime) pair, we'll track the generated_at times and corresponding Forecast
         # This lets us quickly look up all the different forecasts at a Location for the requested time.
+
+        # TODO use integer timestamps (seconds from epoch, truncated to hour) instead of datetimes
+        # This prevents any potential weirdness with timezones, etc.
         self._forecasts: DefaultDict[
             tuple[Location, datetime.datetime], dict[datetime.datetime, ForecastPoint]
         ] = defaultdict(dict)
@@ -44,5 +52,7 @@ class InMemoryDatastore:
         self, loc: Location, dt: datetime.datetime
     ) -> list[ForecastPoint]:
         with self._lock:
+            # TODO this will create empty dict in the default dict - this could potentially use memory is someone
+            # spammed the service with requests.
             forecasts_by_generated_time = self._forecasts[(loc, dt)]
             return list(forecasts_by_generated_time.values())
