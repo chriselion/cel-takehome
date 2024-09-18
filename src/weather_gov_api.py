@@ -7,9 +7,16 @@ import datetime
 import requests
 from src.types import Location, GridPoint, ForecastPoint
 
+# Always pass a timeout to requests, otherwise it can hang forever!
+DEFAULT_TIMEOUT_SECONDS = 30
 
-def get_grid_point_for_location(loc: Location) -> GridPoint:
-    resp = requests.get(f"https://api.weather.gov/points/{loc.lat},{loc.lon}")
+
+def get_grid_point_for_location(
+    loc: Location, timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS
+) -> GridPoint:
+    resp = requests.get(
+        f"https://api.weather.gov/points/{loc.lat},{loc.lon}", timeout=timeout_seconds
+    )
     resp.raise_for_status()
 
     resp_json = resp.json()
@@ -25,16 +32,18 @@ def get_grid_point_for_location(loc: Location) -> GridPoint:
 def get_forecast_for_grid_point(
     grid: GridPoint,
     max_start_time: datetime.datetime | None = None,
+    timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
 ) -> list[ForecastPoint]:
     """
     Get a list of forecasts for the grid point.
     :param grid: The grid point to query
     :param max_start_time: The maximum start time for forecasts.
         Forecast intervals that start after this will be ignored.
+    :param timeout_seconds: Timeout passed to requests
     :return: A list of ForecastPoints
     """
     url = f"https://api.weather.gov/gridpoints/{grid.office}/{grid.grid_x},{grid.grid_y}/forecast/hourly"
-    resp = requests.get(url)
+    resp = requests.get(url, timeout=timeout_seconds)
     resp.raise_for_status()
 
     resp_json = resp.json()
