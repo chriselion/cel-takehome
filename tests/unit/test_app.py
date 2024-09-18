@@ -5,6 +5,7 @@ from unittest import mock
 
 from src.types import GridPoint, Location, ForecastPoint
 import src.weather_gov_api
+import src.update_forecasts
 
 LAT = "39.7456"
 LON = "-97.0892"
@@ -34,9 +35,12 @@ def test_add_location_existing_location(mock_get_datastore):
     assert resp.status_code == 200, resp.data
 
 
+@mock.patch.object(src.update_forecasts, "update_forecasts_for_location")
 @mock.patch.object(src.weather_gov_api, "get_grid_point_for_location")
 @mock.patch.object(app, "get_data_store")
-def test_add_location_unknown_location(mock_get_datastore, mock_api_get_grid):
+def test_add_location_unknown_location(
+    mock_get_datastore, mock_api_get_grid, mock_update_forecasts
+):
     client = app.app.test_client()
     mock_datastore = mock_get_datastore()
     # Test the case where we don't know the grid point, so have to look it up from the API
@@ -48,6 +52,7 @@ def test_add_location_unknown_location(mock_get_datastore, mock_api_get_grid):
     # Make sure that we called the remote API with the location, and that we added it to the database
     mock_api_get_grid.assert_called_once_with(TEST_LOCATION)
     mock_datastore.add_location.assert_called_once_with(TEST_LOCATION, TEST_GRID_POINT)
+    mock_update_forecasts.assert_called_with(TEST_LOCATION, mock_datastore)
     assert resp.status_code == 200, resp.data
 
 
