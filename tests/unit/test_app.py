@@ -52,7 +52,8 @@ def test_add_location_unknown_location(
     # Make sure that we called the remote API with the location, and that we added it to the database
     mock_api_get_grid.assert_called_once_with(TEST_LOCATION)
     mock_datastore.add_location.assert_called_once_with(TEST_LOCATION, TEST_GRID_POINT)
-    mock_update_forecasts.assert_called_with(TEST_LOCATION, mock_datastore)
+    # Make sure we also updated the forecasts since it's the first time we've seen this point.
+    mock_update_forecasts.assert_called_with(TEST_LOCATION, mock_datastore, mock.ANY)
     assert resp.status_code == 200, resp.data
 
 

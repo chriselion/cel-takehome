@@ -5,6 +5,7 @@ from logging.config import dictConfig
 
 from flask import Flask, request, abort
 
+import settings
 from src.datastore.datastore import Datastore
 from src.datastore.in_mem_datastore import InMemoryDatastore
 from src import weather_gov_api
@@ -65,7 +66,9 @@ def add_location() -> str:
 
         # Fetch forecasts, so that we have them available right away
         logging.info("Fetching forecasts for new location")
-        update_forecasts.update_forecasts_for_location(loc, datastore)
+        update_forecasts.update_forecasts_for_location(
+            loc, datastore, settings.MAX_LOOK_AHEAD_HOURS
+        )
 
     return "ok"
 
@@ -109,3 +112,11 @@ def get_forecasts() -> int | dict:
         "min_forecast_temperature": min_temp,
         "temperature_units": units,
     }
+
+
+# start a background thread that will periodically update all registered locations
+update_forecasts.spawn_background_update(
+    get_data_store(),
+    max_hours_ahead=settings.MAX_LOOK_AHEAD_HOURS,
+    refresh_interval_seconds=settings.FORECAST_REFRESH_INTERNAL_SECONDS,
+)
