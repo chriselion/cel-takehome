@@ -6,6 +6,8 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
+# TODO add users so that the web server isn't running as root
+
 ENV FLASK_RUN_PORT=8080
 EXPOSE 8080
 
