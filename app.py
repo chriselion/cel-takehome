@@ -52,8 +52,14 @@ def add_location() -> str:
     return "ok"
 
 
-@app.route("/forecasts", methods=["POST"])
+@app.route("/forecasts", methods=["POST", "GET"])
 def get_forecasts() -> int | dict:
+    # TODO decide on a recommended method for this.
+    # My understanding is that GETs with JSON bodies aren't recommended
+    # (see https://stackoverflow.com/questions/978061/http-get-with-request-body)
+    # But GET seems more appropriate since there are no side-effects here.
+    # As a compromise that will leave nobody happy, but methods are accepted.
+
     req_body = request.json
     # Extract the fields from the request
     loc_dict = req_body["location"]
@@ -71,6 +77,7 @@ def get_forecasts() -> int | dict:
     forecasts = datastore.get_forecasts_for_datetime(loc, dt)
 
     if not forecasts:
+        # TODO better error response
         abort(404)
 
     # TODO make sure all forecasts have the same units
